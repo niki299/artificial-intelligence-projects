@@ -1,0 +1,75 @@
+SUMARIZACIJA VREDNOSTI ATRIBUTA
+	1) Veliki potrosaci (Plava)
+	
+	- Drugi najveci balans (BALANCE)
+	- Najveci ukupan iznos potrošen na kupovinu (PURCHASES)
+	- Najveci kredit limit (CREDIT_LIMIT)
+	- Najveci ukupan iznos uplaćen na karticu (PAYMENTS)
+	
+		Ova grupa korisnika ima najveci ukupan iznos potrosen na kupovinu,
+	sto ih cini najvecim potrosacina. Takodje, ova grupa ima visok balans i 
+	zbog toga joj banka odobrava visok kreditni limit. Zbog visokih priliva,
+	balans ove grupe je stabilan sto dodatno opravdava visok kreditni limit.
+	Ova grupa je dosta diskutabilna posto sve vrednosti znacajno variraju.
+	
+	
+	2) Ucestali korisnici kartice (Narandzasta)
+	
+	- Najnizi balans
+	- Treci najveci ukupan iznos potrošen na kupovinu (PURCHASES)
+	- Treci najveci kredit limit koji znacajno variraju
+	- Treci najveci priliv novca (PAYMENTS)
+	- Najveci procenat ukupnog iznosa koji korisnik treba da uplati na karticu
+	
+		Ova grupa korisnika aktivno koristi svoju karticu. Sve sto je uplaceno na
+	karticu to se i trosi (visok PURCHASES), zbog cega ima nizak balans
+	(stalno podize novac). Pomenute karakteristike isticu ovu grupu kao
+	ucestale korisnike kartice.
+	
+	3) Nepouzdani korisnici (Zelena)
+	
+	- Treci najveci balans
+	- Najnizi kredit limit
+	- Relativno niska potrosnja (PURCHASES)
+	- Najnizi prilivi novca (PAYMENTS)
+	- Najvisa miminalna uplata na karticu (MINIMUM_PAYMENT)
+	
+		Ova grupa korisnika i pored toga sto ima najvece minimalne uplate na karticu,
+	ona ima najmanji balans. Ove cinjenice ukazuju nam na to da ova grupa korisnika ima 
+	retke uplate na karticu sto je cini nepouzdanim korisnicima usluga banke. Zbog toga
+	kreditni limit ove grupe je veoma nizak. 
+	
+	4) Stedise(Crvena)
+	
+	- Relativno visok balans
+	- Druga najveca potrosnja (PURCHASES)
+	- Relativno visok kreditni limit
+	- Prosecna primanja
+	
+		Ovi korisnici i pored prosecnih primanja imaju visok balans. Ova cinjenica
+	ukazuje nam na to da su korisnici ove grupe stedise.
+	
+	5) Pozajmljivaci (Ljubicasta)
+	
+		- Drugi najveci balans
+		- Najveci CASH_ADVANCE
+		
+		Zbog najvece vrednosti CASH_ADVANCE atributa (pozajmice) ovu grupu svrstavamo kao
+	pozajmljivace.
+	
+	6) Radna klasa (Braon)
+	
+		- Nizak balans
+		- Druga najniza potrosnja
+		- Najnizi kredit limit
+		- Drugi najnizi prilivi
+		- Drugi najnizi minimalni priliv
+		
+		Pretpostavljamo da ova grupa predstavlja radnu klasu koja periodicno prima
+	prosecnu kolicinu novca (plata) i ima male izdatke potrebne za zivot.
+	
+	
+		
+	
+	
+	

@@ -33,6 +33,7 @@ class KMeans(object):
         self.n_clusters = n_clusters
         self.max_iter = max_iter
         self.clusters = []
+        self.prediction = []
 
     def fit(self, data, normalize=True):
         self.data = data  # lista N-dimenzionalnih podataka
@@ -49,6 +50,9 @@ class KMeans(object):
             point = [random.random() for x in range(dimensions)]
             self.clusters.append(Cluster(point))
 
+        # inicijalizujemo predikciju
+        self.prediction = [None] * len(data)
+
         iter_no = 0
         not_moves = False
         while iter_no <= self.max_iter and (not not_moves):
@@ -56,11 +60,15 @@ class KMeans(object):
             for cluster in self.clusters:
                 cluster.data = []
 
+            count = 0
             for d in self.data:
                 # index klastera kom pripada tacka
                 cluster_index = self.predict(d)
+
                 # dodamo tacku u klaster kako bi izracunali centar
                 self.clusters[cluster_index].data.append(d)
+                self.prediction[count] = cluster_index
+                count += 1
 
             # TODO (domaci): prosiriti K-means da stane ako se u iteraciji centri klastera nisu pomerili
             # preracunavanje centra
