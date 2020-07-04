@@ -19,3 +19,5 @@ if __name__ == "__main__":
     # visualization_2d(data)
 
     # exploratory_analysis(data)
+
+    treeClassification(data)

@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import seaborn as sb
 from KMeans import KMeans
-import pandas as pd
 from sklearn.decomposition import PCA
 # from sklearn.cluster import KMeans
+from decisionTreeClass import *
 
 def sse_plot(X, start = 2, stop = 20):
     inertia = []
@@ -90,3 +90,17 @@ def exploratory_analysis(data):
                 height=5, aspect=1)
 
     plt.show()
+
+def treeClassification(data):
+
+    # pca = PCA(n_components=2)
+    # pca_data = pca.fit_transform(data)
+
+    km = KMeans(n_clusters=6, max_iter=200)
+    km.fit(data.values, True)
+
+    # km = KMeans(n_clusters=6)
+    # clusters = km.fit_predict(data)
+
+
+    cluster_report(data, km.prediction)
