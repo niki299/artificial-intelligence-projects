@@ -74,10 +74,9 @@ class DummyAgent(CaptureAgent):
     else:
         self.weights = {
           'successorScore': 100.0,
-          'distanceToFood': -1.0,
+          'distanceToFood': -15.0,
           'invaderDistance': -2.0,
           'ghostAlert': -5.0,
-          #'distanceToCapsule': -2.0,
           'invaderAlert': -2.0
         }
 
@@ -195,7 +194,7 @@ class DummyAgent(CaptureAgent):
     ghosts = [a for a in enemies if not a.isPacman and a.scaredTimer == 0 and a.getPosition() != None ]
     if len(ghosts) > 0:
       dists = [self.getMazeDistance(myPos, a.getPosition()) for a in ghosts]
-      if successor.getAgentState(self.index).isPacman and min(dists) < 3:
+      if successor.getAgentState(self.index).isPacman and min(dists) <= 3:
         features['ghostAlert'] = 1
 
     features.divideAll(10.0)
@@ -245,21 +244,24 @@ class DummyAgent(CaptureAgent):
     scoreDiff = self.getScore(currentState) - self.getScore(lastState)
     if scoreDiff > 0:
       # print("Won points!!!!!!!!!!!!!!!")
-      reward = 100 * scoreDiff
-
+      reward += 300 * scoreDiff
+    elif scoreDiff < 0:
+      reward -= 50 * scoreDiff
     #FoodEaten
     currentfoodList = self.getFood(currentState).asList()
     lastfoodList = self.getFood(lastState).asList()
-    reward += 5*(len(currentfoodList) - len(lastfoodList))
+    foodDiff = len(lastfoodList) - len(currentfoodList)
+    if foodDiff > 0:
+        reward += 30 * foodDiff
 
     # if len(currentfoodList) > len(lastfoodList):
     #   print("Eaten food: food count: %d" % len(currentfoodList))
     # elif len(currentfoodList) < len(lastfoodList):
     #   print("food lost: food count: %d" % len(currentfoodList))
 
-    currentDefendFoodList = self.getFoodYouAreDefending(currentState).asList()
-    lastDefendFoodList = self.getFoodYouAreDefending(lastState).asList()
-    reward -= 5*(len(lastDefendFoodList) - len(currentDefendFoodList))
+    # currentDefendFoodList = self.getFoodYouAreDefending(currentState).asList()
+    # lastDefendFoodList = self.getFoodYouAreDefending(lastState).asList()
+    # reward -= 50*(len(lastDefendFoodList) - len(currentDefendFoodList))
 
     # if len(currentDefendFoodList) < len(lastDefendFoodList):
     #   print("Defending food eaten : food count: %d" % len(currentDefendFoodList))
@@ -273,11 +275,12 @@ class DummyAgent(CaptureAgent):
     for e in currentEnemies:
       enemyPos = e.getPosition()
       if (int(enemyPos[0]), int(enemyPos[1])) == e.start.pos:
-        reward += 10
+        reward += 50
         # print("Enemy eaten")
 
-    if currentState.getAgentState(self.index).getPosition() == self.start:
-      reward -= 30
+    if self.getMazeDistance(currentState.getAgentState(self.index).getPosition(),
+                            lastState.getAgentState(self.index).getPosition()) > 3:
+        reward -= 50
       # print("Got eaten")
 
     return reward
