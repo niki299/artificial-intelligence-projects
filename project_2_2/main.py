@@ -142,7 +142,7 @@ def training(model, train_path):
     history = model.fit(
         training_data,
         steps_per_epoch=10,
-        epochs=10,
+        epochs=20,
         validation_data=validation_data,
         callbacks=callbacks_list
     )
@@ -172,7 +172,7 @@ def init_model():
         keras.layers.MaxPooling2D(2, 2),
 
         keras.layers.Flatten(),
-        keras.layers.Dense(500, activation='relu'),
+        keras.layers.Dense(512, activation='relu'),
         keras.layers.Dense(3, activation='softmax')
     ])
 
@@ -204,9 +204,7 @@ def main():
         model.load_weights('weights.best.hdf5')
 
         # configure the model for traning by adding metrics
-        model.compile(loss='categorical_crossentropy', optimizer=RMSprop(lr=0.001), metrics=['accuracy'])
-
-    save_model(model)
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     # loading test data
     test_data_gen = ImageDataGenerator(rescale=1 / 255)
