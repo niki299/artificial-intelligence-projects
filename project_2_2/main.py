@@ -7,8 +7,8 @@ from keras.models import model_from_json
 import pandas as pd
 import os
 from matplotlib import pyplot
-
-
+import random
+from keras.callbacks import ModelCheckpoint
 
 
 def get_data(path):
@@ -26,6 +26,10 @@ def get_data(path):
             virus.append(row)
         elif 'bacteria' in row[2:]:
             bacteria.append(row)
+
+    random.shuffle(normal)
+    random.shuffle(virus)
+    random.shuffle(bacteria)
 
     return normal, virus, bacteria
 
@@ -92,7 +96,6 @@ def split_test(path):
                           path + '\\' + 'test' + '\\' + label + '\\' + str(row[1]))
 
 def save_model(model):
-
     model_json = model.to_json()
     with open("model.json", "w") as json_file:
         json_file.write(model_json)
@@ -131,15 +134,18 @@ def training(model, train_path):
         class_mode='categorical'
     )
 
+    filepath = "weights.best.hdf5"
+    checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+    callbacks_list = [checkpoint]
+
     # training the model
     history = model.fit(
         training_data,
         steps_per_epoch=10,
         epochs=10,
-        validation_data=validation_data
+        validation_data=validation_data,
+        callbacks=callbacks_list
     )
-
-    save_model(model)
 
     # ploting training metrics
     pyplot.subplot(1,2,1)
@@ -178,8 +184,7 @@ def init_model():
         keras.layers.MaxPooling2D(2, 2),
 
         keras.layers.Flatten(),
-        keras.layers.Dense(512, activation='relu'),  # 512 neuron hidden layer
-        # Only 1 output neuron. It will contain a value from 0-1 where 0 for ('Normal') clas and 1 for ('pneumonia') class
+        keras.layers.Dense(512, activation='relu'),
         keras.layers.Dense(3, activation='softmax')
     ])
 
@@ -194,7 +199,7 @@ def init_model():
 def main():
 
 
-    train = False
+    train = True
 
     train_path = 'C:\\Faks\\3. Godina\\6. Semestar\\ORI\\pacman_project\\chest_xray_data_set'
     test_path = 'C:\\Faks\\3. Godina\\6. Semestar\\ORI\\pacman_project\\chest-xray-dataset-test'
@@ -204,11 +209,11 @@ def main():
     # split_data(train_path)
     # split_test(test_path)
 
+    model = init_model()
     if train:
-        model = init_model()
         model = training(model, train_path)
     else:
-        model = load_model()
+        model.load_weights('weights.best.hdf5')
 
         # configure the model for traning by adding metrics
         model.compile(loss='categorical_crossentropy', optimizer=RMSprop(lr=0.001), metrics=['accuracy'])
