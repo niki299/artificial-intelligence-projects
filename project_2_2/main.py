@@ -3,9 +3,13 @@ import numpy as np
 from tensorflow import keras
 from keras.preprocessing.image import ImageDataGenerator
 from keras.optimizers import RMSprop
-from keras.preprocessing import image
+from keras.models import model_from_json
 import pandas as pd
 import os
+from matplotlib import pyplot
+
+
+
 
 def get_data(path):
     csv = pd.read_csv(path + '\\metadata\\chest_xray_metadata.csv')
@@ -44,19 +48,27 @@ def divide(path, list, label, ratio):
 
         cnt += 1
 
+def make_subdirs(path):
+
+    if not os.path.exists(path + '\\Normal'):
+        os.makedirs(path + '\\Normal')
+
+    if not os.path.exists(path + '\\Virus'):
+        os.makedirs(path + '\\Virus')
+
+    if not os.path.exists(path + '\\bacteria'):
+        os.makedirs(path + '\\bacteria')
+
+
 def create_folders(path):
 
     if not os.path.exists(path + '\\training'):
         os.makedirs(path + '\\training')
-        os.makedirs(path + '\\training\\Normal')
-        os.makedirs(path + '\\training\\Virus')
-        os.makedirs(path + '\\training\\bacteria')
+        make_subdirs(path + '\\training')
 
     if not os.path.exists(path + '\\validation'):
         os.makedirs(path + '\\validation')
-        os.makedirs(path + '\\validation\\Normal')
-        os.makedirs(path + '\\validation\\Virus')
-        os.makedirs(path + '\\validation\\bacteria')
+        make_subdirs(path + '\\validation')
 
 def split_data(path):
 
@@ -67,13 +79,80 @@ def split_data(path):
     divide(path, virus, 'Virus', 0.8)
     divide(path, bacteria, 'bacteria', 0.8)
 
-def main():
+def split_test(path):
 
-    path = 'C:\\Faks\\3. Godina\\6. Semestar\\ORI\\pacman_project\\chest_xray_data_set'
+    csv = pd.read_csv(path + '\\chest_xray_test_dataset.csv')
+    make_subdirs(path + '\\test')
 
-    # This function split data into training and validation folder
-    # You call it only when you are using this code for the first time
-    # split_data(path)
+    for row in csv.values:
+        for label in row[2:]:
+            print(label)
+            if label == 'Normal' or label == 'Virus' or label == 'bacteria':
+                os.rename(path + '\\' + 'test' + '\\' + str(row[1]),
+                          path + '\\' + 'test' + '\\' + label + '\\' + str(row[1]))
+
+def save_model(model):
+
+    model_json = model.to_json()
+    with open("model.json", "w") as json_file:
+        json_file.write(model_json)
+    # serialize weights to HDF5
+    model.save_weights("model.h5")
+    print("Saved model to disk")
+
+def load_model():
+    # load json and create model
+    json_file = open('model.json', 'r')
+    loaded_model_json = json_file.read()
+    json_file.close()
+    model = model_from_json(loaded_model_json)
+    # load weights into new model
+    model.load_weights("model.h5")
+    print("Loaded model from disk")
+
+    return model
+
+def training(model, train_path):
+
+    training_data_gen = ImageDataGenerator(rescale=1 / 255)
+    validation_data_gen = ImageDataGenerator(rescale=1 / 255)
+
+    training_data = training_data_gen.flow_from_directory(
+        train_path + '\\training',
+        target_size=(300, 300),
+        batch_size=128,
+        class_mode='categorical'
+    )
+
+    validation_data = validation_data_gen.flow_from_directory(
+        train_path + '\\validation',
+        target_size=(300, 300),
+        batch_size=128,
+        class_mode='categorical'
+    )
+
+    # training the model
+    history = model.fit(
+        training_data,
+        steps_per_epoch=10,
+        epochs=10,
+        validation_data=validation_data
+    )
+
+    save_model(model)
+
+    # ploting training metrics
+    pyplot.subplot(1,2,1)
+    pyplot.plot(history.history['accuracy'])
+    pyplot.plot(history.history['val_accuracy'])
+    pyplot.subplot(1,2,2)
+    pyplot.plot(history.history['loss'])
+    pyplot.plot(history.history['val_loss'])
+    pyplot.show()
+
+    return model
+
+def init_model():
 
     model = keras.models.Sequential([
 
@@ -101,39 +180,54 @@ def main():
         keras.layers.Flatten(),
         keras.layers.Dense(512, activation='relu'),  # 512 neuron hidden layer
         # Only 1 output neuron. It will contain a value from 0-1 where 0 for ('Normal') clas and 1 for ('pneumonia') class
-        keras.layers.Dense(1, activation='sigmoid')
+        keras.layers.Dense(3, activation='softmax')
     ])
 
     # to get the summary of the model
     model.summary()
 
     # configure the model for traning by adding metrics
-    model.compile(loss='binary_crossentropy', optimizer=RMSprop(lr=0.001), metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=RMSprop(lr=0.001), metrics=['accuracy'])
 
-    training_datag_gen = ImageDataGenerator(rescale=1 / 255)
-    validation_data_gen = ImageDataGenerator(rescale=1 / 255)
+    return model
 
-    training_data = training_datag_gen.flow_from_directory(
-        path + '\\training',
+def main():
+
+
+    train = False
+
+    train_path = 'C:\\Faks\\3. Godina\\6. Semestar\\ORI\\pacman_project\\chest_xray_data_set'
+    test_path = 'C:\\Faks\\3. Godina\\6. Semestar\\ORI\\pacman_project\\chest-xray-dataset-test'
+
+    # This function split data into training and validation folder
+    # You call it only when you are using this code for the first time
+    # split_data(train_path)
+    # split_test(test_path)
+
+    if train:
+        model = init_model()
+        model = training(model, train_path)
+    else:
+        model = load_model()
+
+        # configure the model for traning by adding metrics
+        model.compile(loss='categorical_crossentropy', optimizer=RMSprop(lr=0.001), metrics=['accuracy'])
+
+
+    # loading test data
+    test_data_gen = ImageDataGenerator(rescale=1 / 255)
+
+    test_data = test_data_gen.flow_from_directory(
+        test_path + '\\test',
         target_size=(300, 300),
         batch_size=128,
-        class_mode='binary'
+        class_mode='categorical'
     )
 
-    validation_data = validation_data_gen.flow_from_directory(
-        path + '\\validation',
-        target_size=(300, 300),
-        batch_size=128,
-        class_mode='binary'
-    )
+    results = model.evaluate_generator(test_data, 640)
 
-    # training the model
-    history = model.fit(
-        training_data,
-        steps_per_epoch=10,
-        epochs=10,
-        validation_data = validation_data
-    )
+    print('Accuracy on test data: ', results[1])
+    print('Loss on test data: ', results[0])
 
 
 if __name__ == '__main__':
