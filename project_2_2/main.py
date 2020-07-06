@@ -122,14 +122,14 @@ def training(model, train_path):
 
     training_data = training_data_gen.flow_from_directory(
         train_path + '\\training',
-        target_size=(300, 300),
+        target_size=(70, 70),
         batch_size=128,
         class_mode='categorical'
     )
 
     validation_data = validation_data_gen.flow_from_directory(
         train_path + '\\validation',
-        target_size=(300, 300),
+        target_size=(70, 70),
         batch_size=128,
         class_mode='categorical'
     )
@@ -162,29 +162,17 @@ def init_model():
 
     model = keras.models.Sequential([
 
-        # Note the input shape is the desired size of the image 300x300 with 3 bytes color
-        # This is the first convolution
-        keras.layers.Conv2D(16, (3, 3), activation='relu', input_shape=(300, 300, 3)),
+        keras.layers.Conv2D(16, (3, 3), activation='relu', input_shape=(70, 70, 3)),
         keras.layers.MaxPooling2D(2, 2),
 
-        # The second convolution
         keras.layers.Conv2D(32, (3, 3), activation='relu'),
         keras.layers.MaxPooling2D(2, 2),
 
-        # The third convolution
-        keras.layers.Conv2D(64, (3, 3), activation='relu'),
-        keras.layers.MaxPooling2D(2, 2),
-
-        # The fourth convolution
-        keras.layers.Conv2D(64, (3, 3), activation='relu'),
-        keras.layers.MaxPooling2D(2, 2),
-
-        # The fifth convolution
         keras.layers.Conv2D(64, (3, 3), activation='relu'),
         keras.layers.MaxPooling2D(2, 2),
 
         keras.layers.Flatten(),
-        keras.layers.Dense(512, activation='relu'),
+        keras.layers.Dense(500, activation='relu'),
         keras.layers.Dense(3, activation='softmax')
     ])
 
@@ -218,13 +206,14 @@ def main():
         # configure the model for traning by adding metrics
         model.compile(loss='categorical_crossentropy', optimizer=RMSprop(lr=0.001), metrics=['accuracy'])
 
+    save_model(model)
 
     # loading test data
     test_data_gen = ImageDataGenerator(rescale=1 / 255)
 
     test_data = test_data_gen.flow_from_directory(
         test_path + '\\test',
-        target_size=(300, 300),
+        target_size=(70, 70),
         batch_size=128,
         class_mode='categorical'
     )
